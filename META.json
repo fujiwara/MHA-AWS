@@ -47,6 +47,7 @@
             "JSON" : "0",
             "Log::Minimal" : "0",
             "Moo" : "0",
+            "Pod::Usage" : "0",
             "parent" : "0",
             "perl" : "5.008001"
          }
