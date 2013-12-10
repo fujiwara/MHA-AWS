@@ -7,12 +7,12 @@ use Log::Minimal;
 
 sub _command_stop {
     my $self = shift;
-    infof "stop";
+
     my $res = $self->ec2("detach-network-interface", {
         attachment_id => $self->attachment_id,
     });
     infof "result: %s", ddf $res;
-    my $timeout = time + $MHA::AWS::FAILOVER_TIMEOUT;
+    my $timeout = time + $MHA::AWS::API_APPLIED_TIMEOUT;
   DETACHED:
     while ( time < $timeout ) {
         $res = $self->ec2("describe-network-interfaces", {
@@ -30,14 +30,14 @@ sub _command_stop {
 
 sub _command_start {
     my $self = shift;
-    infof "start";
+
     my $res = $self->ec2("attach-network-interface", {
         network_interface_id => $self->interface_id,
         instance_id          => $self->new_master_instance_id,
         device_index         => 2,
     });
     infof "result: %s", ddf $res;
-    my $timeout = time + $MHA::AWS::FAILOVER_TIMEOUT;
+    my $timeout = time + $MHA::AWS::API_APPLIED_TIMEOUT;
   ATTACHED:
     while ( time < $timeout ) {
         $res = $self->ec2("describe-network-interfaces", {
@@ -55,13 +55,13 @@ sub _command_start {
         }
         sleep $MHA::AWS::CHECK_INTERVAL;
     }
-    critf "TIMEOUT %d sec. Can't complete attach-network-interface: %s", $MHA::AWS::FAILOVER_TIMEOUT, $self->interface_id;
+    critf "TIMEOUT %d sec. Can't complete attach-network-interface: %s", $MHA::AWS::API_APPLIED_TIMEOUT, $self->interface_id;
     return;
 }
 
 sub _command_status {
     my $self = shift;
-    infof "status";
+
     if ($self->orig_master_instance_id eq $self->current_attached_instance_id) {
         return 1;
     }

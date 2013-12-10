@@ -9,16 +9,18 @@ use Time::HiRes qw/ sleep /;
 use Scalar::Util qw/ blessed /;
 use Moo;
 
-our $FAILOVER_TIMEOUT = 60;
-our $CHECK_INTERVAL   = 3;
-our $VERSION          = "0.01";
+our $VERSION             = "0.01";
+our $API_APPLIED_TIMEOUT = 120;
+our $CHECK_INTERVAL      = 5;
 
+has host                         => ( is => "rw" );
 has orig_master_host             => ( is => "rw" );
 has new_master_host              => ( is => "rw" );
 has attachment_id                => ( is => "rw" );
 has interface_id                 => ( is => "rw" );
 has current_attached_instance_id => ( is => "rw" );
 has vip                          => ( is => "rw" );
+has ssh_user                     => ( is => "rw" );
 has instance_ids                 => ( is => "rw", default => sub { +{} } );
 has interface_name => (
     is       => "rw",
@@ -86,6 +88,11 @@ sub ping {
     my $self    = shift;
     my $ip_addr = shift;
     system(qw/ timeout 3 ping -c 1 -t 3 /, $ip_addr) == 0 ? 1 : 0;
+}
+
+sub host_instance_id {
+    my $self = shift;
+    $self->instance_ids->{ $self->host };
 }
 
 sub new_master_instance_id {

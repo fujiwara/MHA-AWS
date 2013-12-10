@@ -9,11 +9,15 @@ use Pod::Usage;
 use JSON;
 
 my (
+    $host, $ip, $port,
     $orig_master_host, $orig_master_ip, $orig_master_port,
     $new_master_host, $new_master_ip, $new_master_port, $new_master_password,
     $command, $ssh_user, $interface_name,
 );
 GetOptions(
+    "host=s"                => \$host,
+    "ip=s"                  => \$ip,
+    "port=s"                => \$port,
     "interface_name=s"      => \$interface_name,
     "orig_master_host=s"    => \$orig_master_host,
     "orig_master_ip=s"      => \$orig_master_ip,
@@ -35,9 +39,11 @@ if (!defined $interface_name) {
     die "--interface_name required";
 }
 my $app = $class->new(
+    host             => $host,
     orig_master_host => $orig_master_host,
     new_master_host  => $new_master_host,
     interface_name   => $interface_name,
+    ssh_user         => $ssh_user,
 );
 $app->init;
 print JSON->new->pretty->encode($app->info);
