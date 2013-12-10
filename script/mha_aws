@@ -5,6 +5,7 @@ use warnings;
 use Getopt::Long;
 use String::CamelCase qw/ camelize /;
 use MHA::AWS;
+use Pod::Usage;
 use JSON;
 
 my (
@@ -24,7 +25,8 @@ GetOptions(
     "ssh_user=s"            => \$ssh_user,
     "command=s"             => \$command,
 );
-my $class = sprintf("MHA::AWS::%s", camelize($ARGV[0]));
+my $sub_command = $ARGV[0] or pod2usage();
+my $class = sprintf("MHA::AWS::%s", camelize($sub_command));
 eval "use $class;";
 if ($@) {
     die "Can't load $class: $@";
@@ -49,7 +51,16 @@ __END__
 
 =head1 USAGE
 
-    $ master_ip_failover --interface_name=mha-vip --command=[command from MHA] ...
+    $ mha_aws [subcommand] --interface_name=[description] [... args passed by MHA]
 
-    --interface_name=[Description of ENI]
+    required arguments:
+      --interface_name=[description of ENI for master VIP]
+
+    subcommand:
+      master_ip_failover
+      master_ip_online_change
+      shutdown
+      secondary_check
+      report
+
 =cut

@@ -71,14 +71,4 @@ sub _command_status {
    }
 }
 
-sub info {
-    my $self = shift;
-    my $info = {};
-    for my $key (sort keys %$self) {
-        next if Scalar::Util::blessed($self->{$key});
-        $info->{$key} = $self->{$key};
-    }
-    $info;
-}
-
 1;
