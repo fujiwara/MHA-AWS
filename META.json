@@ -48,6 +48,7 @@
             "Log::Minimal" : "0",
             "Moo" : "0",
             "Pod::Usage" : "0",
+            "String::CamelCase" : "0",
             "parent" : "0",
             "perl" : "5.008001"
          }
@@ -59,5 +60,16 @@
       }
    },
    "release_status" : "unstable",
+   "resources" : {
+      "bugtracker" : {
+         "web" : "https://github.com/fujiwara/MHA-AWS/issues"
+      },
+      "homepage" : "https://github.com/fujiwara/MHA-AWS",
+      "repository" : {
+         "type" : "git",
+         "url" : "git://github.com/fujiwara/MHA-AWS.git",
+         "web" : "https://github.com/fujiwara/MHA-AWS"
+      }
+   },
    "version" : "0.01"
 }
