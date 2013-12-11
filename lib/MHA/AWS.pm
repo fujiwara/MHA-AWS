@@ -137,7 +137,7 @@ __END__
 
 =head1 NAME
 
-MHA::AWS - A support script for MySQL MasterHA running on AWS
+MHA::AWS - A support script for "MySQL Master HA" running on AWS
 
 =head1 SYNOPSIS
 
@@ -150,7 +150,41 @@ MHA::AWS - A support script for MySQL MasterHA running on AWS
 
 =head1 DESCRIPTION
 
-MHA::AWS is a support script for MySQL MasterHA which running on Amazon Web Service.
+MHA::AWS is a support script for "MySQL Master HA" which running on Amazon Web Service.
+
+=head1 REQUIREMENTS
+
+=over 4
+
+=item * One ENI (Elastic Network Interface) must be attached to the MySQL master instance. Clients accesses for the ENI's IP address.
+
+=item * EC2 instance's "Name" tags must be resolved as DNS name in internal.
+
+=item * root user must be allowed to ssh login between each MySQL instances.
+
+=item * aws-cli is installed and available.
+
+=back
+
+=head1 FAILOVER FLOW
+
+=over 4
+
+=item 1 MHA detect master failure.
+
+=item 2 "mhaws master_ip_failover --command stop", ENI will be detached from the old master instance.
+
+=item 3 "mhaws shutdown --command (stopssh|stop)", Old master mysqld process will be killed (if ssh connection is available). Or old master instance will be stopped via AWS API (if ssh connection is NOT available).
+
+=item 4 MHA will elect the new master and set up replication.
+
+=item 5 "mhaws master_ip_failver --command start", ENI will be attached to the new master instance.
+
+=back
+
+=head1 SEE ALSO
+
+L<AWS::CLIWrapper>, L<https://code.google.com/p/mysql-master-ha/>
 
 =head1 LICENSE
 
