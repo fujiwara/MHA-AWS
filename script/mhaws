@@ -57,7 +57,7 @@ __END__
 
 =head1 USAGE
 
-    $ mha_aws [subcommand] --interface_name=[description] [... args passed by MHA]
+    $ mhaws [subcommand] --interface_name=[description] [... args passed by MHA]
 
     required arguments:
       --interface_name=[description of ENI for master VIP]
