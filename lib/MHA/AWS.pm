@@ -13,41 +13,36 @@ our $VERSION             = "0.01";
 our $API_APPLIED_TIMEOUT = 120;
 our $CHECK_INTERVAL      = 5;
 
-has host                         => ( is => "rw" );
-has orig_master_host             => ( is => "rw" );
-has new_master_host              => ( is => "rw" );
-has attachment_id                => ( is => "rw" );
-has interface_id                 => ( is => "rw" );
-has current_attached_instance_id => ( is => "rw" );
-has vip                          => ( is => "rw" );
-has ssh_user                     => ( is => "rw" );
-has instance_ids                 => ( is => "rw", default => sub { +{} } );
-has interface_name => (
-    is       => "rw",
-    required => 1,
-);
+has host             => ( is => "rw" );
+has orig_master_host => ( is => "rw" );
+has new_master_host  => ( is => "rw" );
+has attachment_id    => ( is => "rw" );
+has vip              => ( is => "rw" );
+has ssh_user         => ( is => "rw" );
+has instance_ids     => ( is => "rw", default => sub { +{} } );
+has interface_id     => ( is => "rw", required => 1 );
 has aws => (
     is      => "rw",
     default => sub {
         AWS::CLIWrapper->new();
     },
 );
+has current_attached_instance_id => ( is => "rw" );
 
 sub init {
     my $self = shift;
 
     my $res;
-    $res = $self->ec2("describe-network-interfaces");
-    my ($interface) = grep {
-        $_->{Description} eq $self->interface_name
-    } @{ $res->{NetworkInterfaces} };
+    $res = $self->ec2("describe-network-interfaces", {
+        network_interface_ids => $self->interface_id,
+    });
+    my $interface = $res->{NetworkInterfaces}->[0];
     unless ($interface) {
-        critf "Can't find network interface: %s", $self->interface_name;
+        critf "Can't find network interface: %s", $self->interface_id;
         die;
     }
 
     $self->attachment_id( $interface->{Attachment}->{AttachmentId} );
-    $self->interface_id( $interface->{NetworkInterfaceId} );
     $self->current_attached_instance_id( $interface->{Attachment}->{InstanceId} );
     $self->vip( $interface->{PrivateIpAddress} );
 

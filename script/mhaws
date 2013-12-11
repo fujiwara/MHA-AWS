@@ -12,13 +12,13 @@ my (
     $host, $ip, $port,
     $orig_master_host, $orig_master_ip, $orig_master_port,
     $new_master_host, $new_master_ip, $new_master_port, $new_master_password,
-    $command, $ssh_user, $interface_name,
+    $command, $ssh_user, $interface_id,
 );
 GetOptions(
     "host=s"                => \$host,
     "ip=s"                  => \$ip,
     "port=s"                => \$port,
-    "interface_name=s"      => \$interface_name,
+    "interface_id=s"        => \$interface_id,
     "orig_master_host=s"    => \$orig_master_host,
     "orig_master_ip=s"      => \$orig_master_ip,
     "orig_master_port=s"    => \$orig_master_port,
@@ -35,14 +35,14 @@ eval "use $class;";
 if ($@) {
     die "Can't load $class: $@";
 }
-if (!defined $interface_name) {
-    die "--interface_name required";
+if (!defined $interface_id) {
+    die "--interface_id required";
 }
 my $app = $class->new(
     host             => $host,
     orig_master_host => $orig_master_host,
     new_master_host  => $new_master_host,
-    interface_name   => $interface_name,
+    interface_id     => $interface_id,
     ssh_user         => $ssh_user,
 );
 $app->init;
@@ -57,10 +57,10 @@ __END__
 
 =head1 USAGE
 
-    $ mhaws [subcommand] --interface_name=[description] [... args passed by MHA]
+    $ mhaws [subcommand] --interface_id=ENI-id [... args passed by MHA]
 
     required arguments:
-      --interface_name=[description of ENI for master VIP]
+      --interface_id=[ENI-id for master VIP]
 
     subcommand:
       master_ip_failover
