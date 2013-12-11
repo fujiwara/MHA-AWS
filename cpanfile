@@ -6,6 +6,7 @@ requires 'JSON';
 requires 'Moo';
 requires 'parent';
 requires 'Pod::Usage';
+requires 'String::CamelCase';
 
 on 'test' => sub {
     requires 'Test::More', '0.98';
