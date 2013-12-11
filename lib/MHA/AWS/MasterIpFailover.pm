@@ -5,6 +5,11 @@ use warnings;
 use parent "MHA::AWS";
 use Log::Minimal;
 
+sub _command_stopssh {
+    my $self = shift;
+    $self->_command_stop;
+}
+
 sub _command_stop {
     my $self = shift;
 
