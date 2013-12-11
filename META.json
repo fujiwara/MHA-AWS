@@ -1,5 +1,5 @@
 {
-   "abstract" : "It's new $module",
+   "abstract" : "A support script for MySQL MasterHA running on AWS",
    "author" : [
       "FUJIWARA Shunichiro <fujiwara.shunichiro@gmail.com>"
    ],

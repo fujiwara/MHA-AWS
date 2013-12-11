@@ -137,15 +137,20 @@ __END__
 
 =head1 NAME
 
-MHA::AWS - It's new $module
+MHA::AWS - A support script for MySQL MasterHA running on AWS
 
 =head1 SYNOPSIS
 
-    use MHA::AWS;
+    /etc/masterha_default.cnf
+
+    [server default]
+    master_ip_failover_script=mhaws master_ip_failover --interface_id=eni-xxxxxxxx
+    master_ip_online_change_script=mhaws master_ip_online_change --interface_id=eni-xxxxxxxx
+    shutdown_script=mhaws shutdown --interface_id=eni-xxxxxxxx
 
 =head1 DESCRIPTION
 
-MHA::AWS is ...
+MHA::AWS is a support script for MySQL MasterHA which running on Amazon Web Service.
 
 =head1 LICENSE
 
