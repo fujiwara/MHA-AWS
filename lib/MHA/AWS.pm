@@ -9,7 +9,7 @@ use Time::HiRes qw/ sleep /;
 use Scalar::Util qw/ blessed /;
 use Moo;
 
-our $VERSION             = "0.01";
+our $VERSION             = "0.02";
 our $API_APPLIED_TIMEOUT = 120;
 our $CHECK_INTERVAL      = 5;
 
