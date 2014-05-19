@@ -151,6 +151,29 @@ sub _command_start_eni {
 sub _command_status {
     my $self = shift;
 
+    if ($self->failover_method eq "eni") {
+        $self->_command_status_eni;
+    }
+    else {
+        $self->_command_status_route_table;
+    }
+}
+
+sub _command_status_eni {
+    my $self = shift;
+
+    if ($self->orig_master_instance_id eq $self->current_attached_instance_id) {
+        return 1;
+    }
+    else {
+        critf "orig_master_instance_id: %s != current_attached_instance_id: %s", $self->orig_master_instance_id, $self->current_attached_instance_id;
+        return;
+   }
+}
+
+sub _command_status_route_table {
+    my $self = shift;
+
     if ($self->orig_master_instance_id eq $self->current_attached_instance_id) {
         return 1;
     }

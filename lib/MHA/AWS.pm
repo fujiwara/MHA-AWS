@@ -59,6 +59,12 @@ sub _init_route_table {
         critf "Can't find route_table: %s", $self->route_table_id;
         die;
     }
+    for my $route (@{ $res->{RouteTables}->[0]->{Routes} }) {
+        if ($route->{DestinationCidrBlock} eq $destination_cidr_block) {
+            $self->current_attached_instance_id($route->{InstanceId});
+            return 1;
+        }
+    }
 }
 
 sub init {
