@@ -12,6 +12,16 @@ sub _command_stopssh {
 
 sub _command_stop {
     my $self = shift;
+    if ($self->failover_method eq "eni") {
+        $self->_command_stop_eni;
+    }
+    else {
+        $self->_command_stop_route_table;
+    }
+}
+
+sub _command_stop_eni {
+    my $self = shift;
 
     my $res = $self->ec2("detach-network-interface", {
         attachment_id => $self->attachment_id,
@@ -33,7 +43,81 @@ sub _command_stop {
     return;
 }
 
+sub _command_stop_route_table {
+    my $self = shift;
+
+    my $destination_cidr_block = sprintf("%s/32", $self->vip);
+
+    my $res = $self->ec2("delete-route", {
+        route_table_id         => $self->route_table_id,
+        destination_cidr_block => $destination_cidr_block,
+    });
+    infof "result: %s", ddf $res;
+    my $timeout = time + $MHA::AWS::API_APPLIED_TIMEOUT;
+ WAITING:
+    while ( time < $timeout ) {
+        $res = $self->ec2("describe-route-tables", {
+            route_table_id => $self->route_table_id,
+        });
+        my @routes = @{ $res->{RouteTables}->[0]->{Routes} };
+        for my $route (@routes) {
+            if ( $route->{DestinationCidrBlock} eq $destination_cidr_block ) {
+                sleep $MHA::AWS::CHECK_INTERVAL;
+                next WAITING;
+            }
+        }
+        infof "delete-route completed.";
+        return 1;
+    }
+    critf "TIMEOUT: %d sec. Can't complete delete-route: %s %s", $MHA::AWS::FAILOVER_TIMEOUT, $self->route_table_id, $destination_cidr_block;
+    return;
+}
+
 sub _command_start {
+    my $self = shift;
+
+    if ($self->failover_method eq "eni") {
+        $self->_command_start_eni;
+    }
+    else {
+        $self->_command_start_route_table;
+    }
+}
+
+sub _command_start_route_table {
+    my $self = shift;
+
+    my $destination_cidr_block = sprintf("%s/32", $self->vip);
+
+    my $res = $self->ec2("create-route", {
+        route_table_id         => $self->route_table_id,
+        instance_id            => $self->new_master_instance_id,
+        destination_cidr_block => $destination_cidr_block,
+    });
+    infof "result: %s", ddf $res;
+    my $timeout = time + $MHA::AWS::API_APPLIED_TIMEOUT;
+ WAITING:
+    while ( time < $timeout ) {
+        $res = $self->ec2("describe-route-tables", {
+            route_table_id => $self->route_table_id,
+        });
+        my @routes = @{ $res->{RouteTables}->[0]->{Routes} };
+        for my $route (@routes) {
+            if (
+                $route->{DestinationCidrBlock} eq $destination_cidr_block
+             && $route->{InstanceId} eq $self->new_master_instance_id
+             ) {
+                infof "create-route complated.";
+                return 1;
+            }
+        }
+        sleep $MHA::AWS::CHECK_INTERVAL;
+    }
+    critf "TIMEOUT %d sec. Can't complete create-route: %s %s", $MHA::AWS::API_APPLIED_TIMEOUT, $self->route_table_id, $destination_cidr_block;
+    return;
+}
+
+sub _command_start_eni {
     my $self = shift;
 
     my $res = $self->ec2("attach-network-interface", {

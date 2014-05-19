@@ -20,7 +20,9 @@ has attachment_id    => ( is => "rw" );
 has vip              => ( is => "rw" );
 has ssh_user         => ( is => "rw" );
 has instance_ids     => ( is => "rw", default => sub { +{} } );
-has interface_id     => ( is => "rw", required => 1 );
+has interface_id     => ( is => "rw" );
+has failover_method  => ( is => "rw", required => 1 );
+has route_table_id   => ( is => "rw" );
 has aws => (
     is      => "rw",
     default => sub {
@@ -29,9 +31,8 @@ has aws => (
 );
 has current_attached_instance_id => ( is => "rw" );
 
-sub init {
+sub _init_eni {
     my $self = shift;
-
     my $res;
     $res = $self->ec2("describe-network-interfaces", {
         network_interface_ids => $self->interface_id,
@@ -45,9 +46,33 @@ sub init {
     $self->attachment_id( $interface->{Attachment}->{AttachmentId} );
     $self->current_attached_instance_id( $interface->{Attachment}->{InstanceId} );
     $self->vip( $interface->{PrivateIpAddress} );
+}
 
-    # tag から hostname => instance-id の対応表を作る
-    $res = $self->ec2("describe-tags");
+sub _init_route_table {
+    my $self = shift;
+    my $res;
+    my $destination_cidr_block = sprintf("%s/32", $self->vip);
+    $res = $self->ec2("describe-route-tables", {
+        route_table_id => $self->route_table_id,
+    });
+    if ( !$res->{RouteTables}->[0] ) {
+        critf "Can't find route_table: %s", $self->route_table_id;
+        die;
+    }
+}
+
+sub init {
+    my $self = shift;
+
+    if ($self->failover_method eq "eni") {
+        $self->_init_eni;
+    }
+    else {
+        $self->_init_route_table;
+    }
+
+    # create mapping table (hostname => instance-id) from tags
+    my $res = $self->ec2("describe-tags");
     for my $tag (@{ $res->{Tags} }) {
         if ($tag->{ResourceType} eq "instance" && $tag->{Key} eq "Name") {
             $self->instance_ids->{ $tag->{Value} } = $tag->{ResourceId};

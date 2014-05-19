@@ -32,7 +32,7 @@ MHA::AWS is a support script for "MySQL Master HA" which running on Amazon Web S
 
 # SEE ALSO
 
-[AWS::CLIWrapper](http://search.cpan.org/perldoc?AWS::CLIWrapper), [https://code.google.com/p/mysql-master-ha/](https://code.google.com/p/mysql-master-ha/)
+[AWS::CLIWrapper](https://metacpan.org/pod/AWS::CLIWrapper), [https://code.google.com/p/mysql-master-ha/](https://code.google.com/p/mysql-master-ha/)
 
 # LICENSE
 
