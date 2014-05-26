@@ -14,19 +14,25 @@ sub _command_stop {
     });
     infof "result: %s", ddf $res;
     my $timeout = time + $MHA::AWS::API_APPLIED_TIMEOUT;
+    my $last_state;
  STOP:
     while ( time < $timeout ) {
         $res = $self->ec2("describe-instances", {
             instance_ids => $self->host_instance_id,
         });
         my $instance = $res->{Reservations}->[0]->{Instances}->[0];
-        if ( $instance->{State}->{Name} eq "stopped" ) {
+        $last_state = $instance->{State}->{Name};
+        if ( $last_state eq "stopped" ) {
             infof "instance stopped.";
             return 1;
         }
         sleep $MHA::AWS::CHECK_INTERVAL;
     }
-    critf "TIMEOUT: %d sec. Can't confirm stop-instances: %s", $MHA::AWS::FAILOVER_TIMEOUT, $self->host_instance_id;
+    if ( $last_state eq "stopping" ) {
+        infof "instance is stopping state, but timeout %d sec reached. detected as it was stopped!", $MHA::AWS::API_APPLIED_TIMEOUT;
+        return 1;
+    }
+    critf "TIMEOUT: %d sec. Can't confirm stop-instances: %s", $MHA::AWS::API_APPLIED_TIMEOUT, $self->host_instance_id;
     return;
 }
 

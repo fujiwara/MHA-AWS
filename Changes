@@ -2,6 +2,10 @@ Revision history for Perl extension MHA-AWS
 
 {{$NEXT}}
 
+0.04 2014-05-26T10:18:34Z
+
+    - if timeout reached in stopping the old master instance (still "stopping" state), detected as it be stopped.
+
 0.03 2014-05-19T11:01:50Z
 
     - fix status command
