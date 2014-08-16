@@ -9,7 +9,7 @@ use Time::HiRes qw/ sleep /;
 use Scalar::Util qw/ blessed /;
 use Moo;
 
-our $VERSION             = "0.04";
+our $VERSION             = "0.05";
 our $API_APPLIED_TIMEOUT = 120;
 our $CHECK_INTERVAL      = 5;
 
@@ -172,6 +172,23 @@ MHA::AWS - A support script for "MySQL Master HA" running on AWS
 
 =head1 SYNOPSIS
 
+    $ mhaws [subcommand] --interface_id=ENI-id [... args passed by MHA]
+    $ mhaws [subcommand] --route_table_id=[RouteTable-id] --vip=[master VIP] [... args passed by MHA]
+
+    required arguments:
+      1. failover method is ENI attach/detach
+        --interface_id=[ENI-id for master VIP]
+
+      2. failover method is RouteTable change destination
+        --route_table_id=[RouteTable-id]
+        --vip=[master VIP]
+
+    subcommand:
+      master_ip_failover
+      master_ip_online_change
+      shutdown
+
+
     /etc/masterha_default.cnf
 
     [server default]
@@ -187,13 +204,31 @@ MHA::AWS is a support script for "MySQL Master HA" which running on Amazon Web S
 
 =over 4
 
-=item * One ENI (Elastic Network Interface) must be attached to the MySQL master instance. Clients accesses for the ENI's IP address.
-
 =item * EC2 instance's "Name" tags must be resolved as DNS name in internal.
 
 =item * root user must be allowed to ssh login between each MySQL instances.
 
 =item * aws-cli is installed and available.
+
+=back
+
+=head2 Failover method = ENI attach/detach
+
+=over 4
+
+=item * One ENI (Elastic Network Interface) must be attached to the MySQL master instance. Clients accesses for the ENI's IP address.
+
+=back
+
+=head2 Failover method = VPC route table rewriting
+
+=over 4
+
+=item * Prepare a VIP address in your VPC.
+
+=item * All MySQL hosts(master, slaves) can handle the VIP.
+
+=item * Clients accesses for the VIP address.
 
 =back
 
@@ -205,11 +240,27 @@ MHA::AWS is a support script for "MySQL Master HA" which running on Amazon Web S
 
 =item 2 "mhaws master_ip_failover --command stop", ENI will be detached from the old master instance.
 
+=over 8
+
+=item * (ENI) ENI will be detached from the old master instance.
+
+=item * (Route table) Route to VIP will be removed from VPC route table.
+
+=back
+
 =item 3 "mhaws shutdown --command (stopssh|stop)", Old master mysqld process will be killed (if ssh connection is available). Or old master instance will be stopped via AWS API (if ssh connection is NOT available).
 
 =item 4 MHA will elect the new master and set up replication.
 
 =item 5 "mhaws master_ip_failver --command start", ENI will be attached to the new master instance.
+
+=over 8
+
+=item * (ENI) ENI will be attached to the new master instance.
+
+=item * (Route table) Route to VIP will be set to new master instance.
+
+=back
 
 =back
 
