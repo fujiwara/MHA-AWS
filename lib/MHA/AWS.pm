@@ -238,7 +238,7 @@ MHA::AWS is a support script for "MySQL Master HA" which running on Amazon Web S
 
 =item 1 MHA detect master failure.
 
-=item 2 "mhaws master_ip_failover --command stop", ENI will be detached from the old master instance.
+=item 2 "mhaws master_ip_failover --command stop",
 
 =over 8
 
@@ -252,7 +252,7 @@ MHA::AWS is a support script for "MySQL Master HA" which running on Amazon Web S
 
 =item 4 MHA will elect the new master and set up replication.
 
-=item 5 "mhaws master_ip_failver --command start", ENI will be attached to the new master instance.
+=item 5 "mhaws master_ip_failver --command start",
 
 =over 8
 
