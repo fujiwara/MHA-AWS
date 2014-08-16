@@ -2,6 +2,10 @@ Revision history for Perl extension MHA-AWS
 
 {{$NEXT}}
 
+0.05 2014-08-16T08:09:50Z
+
+   - update document for VPC route table rewriting.
+
 0.04 2014-05-26T10:18:34Z
 
     - if timeout reached in stopping the old master instance (still "stopping" state), detected as it be stopped.
