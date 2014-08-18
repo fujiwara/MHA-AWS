@@ -54,13 +54,13 @@ MHA::AWS is a support script for "MySQL Master HA" which running on Amazon Web S
 
 # FAILOVER FLOW
 
-1 MHA detect master failure.
-2 "mhaws master\_ip\_failover --command stop",
+1. MHA detect master failure.
+2. "mhaws master\_ip\_failover --command stop",
     - (ENI) ENI will be detached from the old master instance.
     - (Route table) Route to VIP will be removed from VPC route table.
-3 "mhaws shutdown --command (stopssh|stop)", Old master mysqld process will be killed (if ssh connection is available). Or old master instance will be stopped via AWS API (if ssh connection is NOT available).
-4 MHA will elect the new master and set up replication.
-5 "mhaws master\_ip\_failver --command start",
+3. "mhaws shutdown --command (stopssh|stop)", Old master mysqld process will be killed (if ssh connection is available). Or old master instance will be stopped via AWS API (if ssh connection is NOT available).
+4. MHA will elect the new master and set up replication.
+5. "mhaws master\_ip\_failver --command start",
     - (ENI) ENI will be attached to the new master instance.
     - (Route table) Route to VIP will be set to new master instance.
 
